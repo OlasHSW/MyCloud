@@ -8,6 +8,7 @@
     session_start();
     function blockLoginForMinute() {
         $_SESSION["login_blocked"] = time() + 60; // Blokada na 1 minutę
+        $_SESSION['login_attempts'] = 0; // Zresetuj licznik prób logowania
     }
     
     function isLoginBlocked() {
@@ -39,13 +40,16 @@
             $_SESSION ['loggedin'] = true;
             $_SESSION['username'] = $user;
             echo "Logowanie Ok. User: {$rekord['username']}. Hasło: {$rekord['password']}";
-            header('Refresh:2; url=checkgeo.php');
+            header('Refresh:2; url=savetodb.php');
         }
         else
         {
             mysqli_close($link);
             echo "Błąd w haśle !"; // UWAGA nie wyświetlamy takich podpowiedzi dla hakerów
-            blockLoginForMinute();
+            $_SESSION['login_attempts'] = isset($_SESSION['login_attempts']) ? $_SESSION['login_attempts'] + 1 : 1;
+            if ($_SESSION['login_attempts'] >= 3) {
+                blockLoginForMinute();
+            }
             header('Refresh:2; url=logowanie.php');
         }
     }
