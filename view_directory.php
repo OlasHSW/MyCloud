@@ -54,6 +54,32 @@
     }
     mysqli_close($link);
     ?>
-<br/><a href ="sesja.php">Powrót do głównego katalogu</a><br/>
+    <br/><form id="createDirForm">
+    <input type="text" id="dirName" required>
+    <button type="submit">Stwórz Katalog</button>
+    </form><br/><a href ="sesja.php">Powrót do głównego katalogu</a><br/>
+    <script>
+    document.getElementById('createDirForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var dirName = document.getElementById('dirName').value;
+        createDirectory(dirName);
+    });
+    function createDirectory(dirName) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    alert('Katalog został pomyślnie utworzony.');
+                    window.location.reload();
+                } else {
+                    alert('Wystąpił błąd podczas tworzenia katalogu.');
+                }
+            }
+        };
+        xhr.open('POST', 'create_directory.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send('dirName=' + dirName);
+    }
+</script>
 </BODY>
 </HTML>

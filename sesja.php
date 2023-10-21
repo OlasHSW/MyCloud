@@ -16,7 +16,7 @@
     if(!$link) { echo"Błąd: ". mysqli_connect_errno()." ".mysqli_connect_error(); }
     mysqli_query($link, "SET NAMES 'utf8'");
     $folder = mysqli_query($link, "SELECT user_directory FROM users WHERE username='$user'");
-    echo "Jesteś zalogowany" . "<br/>" . "Oto Twoja lista katalogów i plików:" . "<br/>";
+    echo "<b>Jesteś zalogowany" . "<br/>" . "Oto Twoja lista katalogów i plików:" . "</b><br/>";
     $row = mysqli_fetch_assoc($folder);
     $user_directory = $row['user_directory'];
     echo "<br />";
@@ -35,7 +35,32 @@
         echo "Katalog macierzysty nie istnieje.";
     }
     ?>
-    <br /><br />
-    <a href ="logout.php">Wyloguj</a><br/>
+    <br/><form id="createDirForm">
+    <input type="text" id="dirName" required>
+    <button type="submit">Stwórz Katalog</button>
+    </form><br/><a href ="logout.php">Wyloguj</a><br/>
+    <script>
+    document.getElementById('createDirForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var dirName = document.getElementById('dirName').value;
+        createDirectory(dirName);
+    });
+    function createDirectory(dirName) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    alert('Katalog został pomyślnie utworzony.');
+                    window.location.reload();
+                } else {
+                    alert('Wystąpił błąd podczas tworzenia katalogu.');
+                }
+            }
+        };
+        xhr.open('POST', 'create_directory.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send('dirName=' + dirName);
+    }
+</script>
 </BODY>
 </HTML>
