@@ -7,17 +7,35 @@
 <BODY>
     <?php //declare(strict_types=1); // włączenie typowania zmiennych w PHP >=7
     session_start(); // zapewnia dostęp do zmienny sesyjnych w danym pliku
-    if (!isset($_SESSION['loggedin']))
-    {
+    if (!isset($_SESSION['username'])) {
         header('Refresh:0; url=logowanie.php');
         exit();
     }
-    echo "Jesteś zalogowany";
+    $user = $_SESSION['username'];
+    $link = mysqli_connect('sql303.infinityfree.com', 'if0_34773873', 'HaxC1Htjx2epk', 'if0_34773873_z4');
+    if(!$link) { echo"Błąd: ". mysqli_connect_errno()." ".mysqli_connect_error(); }
+    mysqli_query($link, "SET NAMES 'utf8'");
+    $folder = mysqli_query($link, "SELECT user_directory FROM users WHERE username='$user'");
+    echo "Jesteś zalogowany" . "<br/>" . "Oto Twoja lista katalogów i plików:" . "<br/>";
+    $row = mysqli_fetch_assoc($folder);
+    $user_directory = $row['user_directory'];
+    echo "<br />";
+    if (is_dir($user_directory)) { /*Otwórz katalog*/
+        if ($dh = opendir($user_directory)) { /*Wyświetl pliki i podkatalogi*/
+            while (($file = readdir($dh)) !== false) {
+                if ($file != "." && $file != "..") {
+                    echo "<a href='view_directory.php?directory=$file'>$file</a><br>";
+                }
+            }
+            closedir($dh);
+        } else {
+            echo "Nie udało się otworzyć katalogu.";
+        }
+    } else {
+        echo "Katalog macierzysty nie istnieje.";
+    }
     ?>
-    <br />
-    <a href ="showgeodb.php">Historia logowań</a><br />
-    <a href ="index1.php">Posty</a><br />
     <br /><br />
-    <a href ="logout.php">Wyloguj</a><br />
+    <a href ="logout.php">Wyloguj</a><br/>
 </BODY>
 </HTML>
