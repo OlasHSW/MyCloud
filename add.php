@@ -5,6 +5,15 @@
 </head>
 <BODY>
     <?php
+    function sprawdzZnaki($user) {
+        $znaki = array('"', '\'', '\\', '/', ':', '|', '<', '>', '*', '?');
+        foreach ($znaki as $znak) {
+            if (strpos($user, $znak) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
     $user = htmlentities ($_POST['user'], ENT_QUOTES, "UTF-8"); // rozbrojenie potencjalnej bomby w zmiennej $user
     $pass = htmlentities ($_POST['pass'], ENT_QUOTES, "UTF-8"); // rozbrojenie potencjalnej bomby w zmiennej $pass 
     $pass2 = htmlentities ($_POST['pass2'], ENT_QUOTES, "UTF-8"); // rozbrojenie potencjalnej bomby w zmiennej $pass2  
@@ -13,6 +22,12 @@
     mysqli_query($link, "SET NAMES 'utf8'"); // ustawienie polskich znaków
     $result = mysqli_query($link, "SELECT * FROM users WHERE username='$user'"); // wiersza, w którym login=login z formularza
     $rekord = mysqli_fetch_array($result); // wiersza z BD, struktura zmiennej jak w BD
+    if (sprawdzZnaki($user)) {   
+        mysqli_close($link);
+        echo "Niedozwolone znaki w nazwie użytkownika!";
+        header('Refresh:2; url=rejestruj.php');
+        exit;
+    }
     if(!$rekord) /*Jeśli brak, to nie ma użytkownika o podanym loginie*/ {
         if($pass==$pass2) /*czy hasło zgadza się z BD*/ {
             // Dodaj nowego użytkownika do bazy danych
