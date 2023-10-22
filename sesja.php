@@ -5,8 +5,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <BODY>
-    <?php //declare(strict_types=1); // włączenie typowania zmiennych w PHP >=7
-    session_start(); // zapewnia dostęp do zmienny sesyjnych w danym pliku
+    <?php
+    session_start();
     if (!isset($_SESSION['username'])) {
         header('Refresh:0; url=logowanie.php');
         exit();
@@ -19,18 +19,17 @@
     echo "<b>Jesteś zalogowany" . "<br/>" . "Oto Twoja lista katalogów i plików:" . "</b><br/>";
     $row = mysqli_fetch_assoc($folder);
     $user_directory = $row['user_directory'];
-    echo "<br />";
-    if (is_dir($user_directory)) { /*Otwórz katalog*/
-        if ($dh = opendir($user_directory)) { /*Wyświetl pliki i podkatalogi*/
+    $directories = [];
+    $files = [];
+    if (is_dir($user_directory)) {
+        if ($dh = opendir($user_directory)) {
             while (($file = readdir($dh)) !== false) {
                 if ($file != "." && $file != "..") {
                     $filePath = $user_directory . '/' . $file;
                     if (is_dir($filePath)) {
-                        echo "<a href='view_directory.php?directory=$file'>$file</a>";
-                        echo "<a href='delete.php?path=$filePath'><img src='delete_icon.png' alt='Usuń' style='width: auto; height: 16px;'></a><br>";
+                        $directories[] = $file;
                     } else {
-                        echo "<a href='view_file.php?file=$filePath'>$file</a>";
-                        echo "<a href='delete.php?path=$filePath'><img src='delete_icon.png' alt='Usuń' style='width: auto; height: 16px;'></a><br>";
+                        $files[] = $file;
                     }
                 }
             }
@@ -41,11 +40,31 @@
     } else {
         echo "Katalog macierzysty nie istnieje.";
     }
+    sort($directories);
+    sort($files);
+    foreach ($directories as $dir) {
+        $dirPath = $user_directory . '/' . $dir;
+        echo "<a href='view_directory.php?directory=$dir'>$dir</a>";
+        echo "<a href='delete.php?path=$dirPath'><img src='delete_icon.png' alt='Usuń' style='width: auto; height: 16px;'></a><br>";
+    }
+    foreach ($files as $file) {
+        $filePath = $user_directory . '/' . $file;
+        echo "<a href='view_file.php?file=$filePath'>$file</a>";
+        echo "<a href='delete.php?path=$filePath'><img src='delete_icon.png' alt='Usuń' style='width: auto; height: 16px;'></a>";
+        echo "<a href='$filePath' download='$file'><img src='download_icon.png' alt='Pobierz' style='width: auto; height: 16px;'></a><br>";
+    }
     ?>
     <br/><form id="createDirForm">
     <input type="text" id="dirName" required>
     <button type="submit">Stwórz Katalog</button>
-    </form><br/><a href ="logout.php">Wyloguj</a><br/>
+    </form>
+    <form action="upload_handler.php" method="post" enctype="multipart/form-data">
+    Przesyłanie: <br/>
+    <input type="file" name="uploaded_file" id="uploaded_file" accept=".txt, .jpg, .png, .gif, .pdf, .docx, .doc, .mp3, .wav, .mp4">
+    <input type="hidden" name="current_directory" value="<?php echo $user_directory; ?>"><br/>
+    <input type="submit" value="Prześlij Plik" name="submit">
+    </form>
+    <br/><a href ="logout.php">Wyloguj</a><br/>
     <script>
     document.getElementById('createDirForm').addEventListener('submit', function(event) {
         event.preventDefault();
