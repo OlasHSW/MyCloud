@@ -24,7 +24,14 @@
         if ($dh = opendir($user_directory)) { /*Wyświetl pliki i podkatalogi*/
             while (($file = readdir($dh)) !== false) {
                 if ($file != "." && $file != "..") {
-                    echo "<a href='view_directory.php?directory=$file'>$file</a><br>";
+                    $filePath = $user_directory . '/' . $file;
+                    if (is_dir($filePath)) {
+                        echo "<a href='view_directory.php?directory=$file'>$file</a>";
+                        echo "<a href='delete.php?path=$filePath'><img src='delete_icon.png' alt='Usuń' style='width: auto; height: 16px;'></a><br>";
+                    } else {
+                        echo "<a href='view_file.php?file=$filePath'>$file</a>";
+                        echo "<a href='delete.php?path=$filePath'><img src='delete_icon.png' alt='Usuń' style='width: auto; height: 16px;'></a><br>";
+                    }
                 }
             }
             closedir($dh);

@@ -32,8 +32,11 @@
                     if ($dh = opendir($subDirectoryPath)) {
                         // Wyświetl pliki i podkatalogi
                         while (($file = readdir($dh)) !== false) {
-                            if ($file != "." && $file != "..") {
-                                echo "<a href='view_directory.php?directory=$subDirectory/$file'>$file</a><br>";
+                            if ($file != "." && $file != ".." && is_file($subDirectoryPath . '/' . $file)) {
+                                $filePath = $subDirectoryPath . '/' . $file;
+                                // Wyświetl link do otwarcia pliku
+                                echo "<a href='view_file.php?file=$filePath'>$file</a>";
+                                echo "<a href='delete.php?path=$filePath'><img src='delete_icon.png' alt='Usuń' style='width: auto; height: 16px;'></a><br>";
                             }
                         }
                         closedir($dh);
@@ -41,7 +44,7 @@
                         echo "Nie udało się otworzyć katalogu.";
                     }
                 } else {
-                    echo "Podkatalog nie istnieje.";
+                    //echo "Podkatalog nie istnieje.";
                 }
             } else {
                 echo "Brak wybranego podkatalogu.";
@@ -54,32 +57,6 @@
     }
     mysqli_close($link);
     ?>
-    <br/><form id="createDirForm">
-    <input type="text" id="dirName" required>
-    <button type="submit">Stwórz Katalog</button>
-    </form><br/><a href ="sesja.php">Powrót do głównego katalogu</a><br/>
-    <script>
-    document.getElementById('createDirForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        var dirName = document.getElementById('dirName').value;
-        createDirectory(dirName);
-    });
-    function createDirectory(dirName) {
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    alert('Katalog został pomyślnie utworzony.');
-                    window.location.reload();
-                } else {
-                    alert('Wystąpił błąd podczas tworzenia katalogu.');
-                }
-            }
-        };
-        xhr.open('POST', 'create_directory.php', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.send('dirName=' + dirName);
-    }
-</script>
+    <br/><br/><a href ="sesja.php">Powrót do głównego katalogu</a><br/>
 </BODY>
 </HTML>
